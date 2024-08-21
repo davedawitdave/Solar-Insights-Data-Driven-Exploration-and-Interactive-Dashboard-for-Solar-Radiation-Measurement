@@ -91,7 +91,7 @@ class Charts:
         plt.grid(True)
         plt.show()
 
-    def wind_polar_plot(self, speed_col, direction_col, title="Wind Polar Plot"):
+    def polar_plot(self, speed_col, direction_col, title="Wind Polar Plot"):
         fig = px.scatter_polar(
             self.data,
             r=speed_col,
