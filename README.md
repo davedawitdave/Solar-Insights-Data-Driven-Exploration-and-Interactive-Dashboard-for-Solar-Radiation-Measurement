@@ -1,1 +1,1 @@
-# SolarInsights-Data-Driven-Exploration-and-Interactive-Dashboard-for-Solar-Radiation-Measurement
+# Solar Insights: Data-Driven-Exploration-and-Interactive-Dashboard-for-Solar-Radiation-Measurement
