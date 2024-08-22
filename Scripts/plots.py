@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import pandas as pd
+import numpy as np
 
 
 class Charts:
@@ -76,7 +77,7 @@ class Charts:
             plt.grid(True)
             plt.show()
 
-    def histogram(self, column, bins=30, title="Histogram"):
+    def histogram(self, column, bins=30, title="Histogram", xlabel="Values"):
         """
         Creates a histogram for the specified column.
 
@@ -85,11 +86,20 @@ class Charts:
         bins (int): Number of bins for the histogram.
         title (str): The title of the histogram.
         """
+        # Ensure the column exists
+        if column not in self.data.columns:
+            raise KeyError(f"{column} not found in DataFrame.")
+
         plt.figure(figsize=(10, 6))
-        plt.hist(self.data[column], bins=bins, edgecolor="black")
-        plt.title(title)
-        plt.xlabel(column)
-        plt.ylabel("Frequency")
+        sns.histplot(
+            self.data[column], bins=bins, kde=True, color="skyblue", edgecolor="black"
+        )
+
+        # Set titles and labels
+        plt.title(title, fontsize=16)
+        plt.xlabel(xlabel, fontsize=14)
+        plt.ylabel("Frequency", fontsize=14)
+
         plt.grid(True)
         plt.show()
 
@@ -202,15 +212,31 @@ class Charts:
         direction_col (str): The column name representing wind direction.
         title (str): The title of the wind polar plot.
         """
-        fig = px.scatter_polar(
-            self.data,
-            r=speed_col,
-            theta=direction_col,
-            color=speed_col,
-            title=title,
-            color_continuous_scale=px.colors.sequential.Viridis,
-        )
-        fig.show()
+        # Ensure the columns exist
+        if speed_col not in self.data.columns or direction_col not in self.data.columns:
+            raise KeyError(f"{speed_col} or {direction_col} not found in DataFrame.")
+
+        # Convert wind direction from degrees to radians
+        wind_dir_rad = np.radians(self.data[direction_col])
+
+        # Create a figure for the polar plot
+        plt.figure(figsize=(10, 8))
+
+        # Create a polar plot
+        ax = plt.subplot(111, projection="polar")
+        ax.set_theta_zero_location("N")  # North at the top
+        ax.set_theta_direction(-1)  # Clockwise direction
+
+        # Plot wind speed data
+        ax.scatter(wind_dir_rad, self.data[speed_col], alpha=0.6, edgecolors="w")
+
+        # Set labels
+        ax.set_title("Wind Speed and Direction", va="bottom", fontsize=16)
+        ax.set_xlabel("Wind Direction (Degrees)")
+        ax.set_ylabel("Wind Speed")
+
+        plt.grid(True)
+        plt.show()
 
 
 # Example usage:
