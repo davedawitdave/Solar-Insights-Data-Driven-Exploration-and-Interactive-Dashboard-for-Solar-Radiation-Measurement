@@ -15,7 +15,7 @@ class Charts:
         """
         self.data = data
 
-    def correlation_heatmap(self):
+    def correlation_heatmap(self, title="heatmap"):
         """
         Displays a heatmap of the correlation matrix of the dataframe.
         """
@@ -23,25 +23,58 @@ class Charts:
         sns.heatmap(
             self.data.corr(), annot=True, fmt=".2f", cmap="coolwarm", linewidths=0.5
         )
-        plt.title("Correlation Heatmap")
+        plt.title(title)
         plt.show()
 
-    def timeseries_plot(self, x_col, y_col, title="Time Series Plot"):
+    def time_series_analysis(self, columns, date_column, aggregations=["D", "M", "Y"]):
         """
-        Plots a time series graph for a given x and y column.
+        Displays time series plots for the specified columns, with options to aggregate data by day, week, month, or year.
 
         Parameters:
-        x_col (str): The column name for the x-axis (typically 'Timestamp').
-        y_col (str): The column name for the y-axis.
-        title (str): The title of the plot.
+        columns (list of str): The columns to plot.
+        aggregation (str): Aggregation level ('D' for daily, 'W' for weekly, 'M' for monthly, 'Y' for yearly).
         """
-        plt.figure(figsize=(14, 6))
-        plt.plot(self.data[x_col], self.data[y_col])
-        plt.title(title)
-        plt.xlabel(x_col)
-        plt.ylabel(y_col)
-        plt.grid(True)
-        plt.show()
+        # Convert the date_column to datetime and set it as the index
+        if date_column not in self.data.columns:
+            raise KeyError(f"{date_column} not found in DataFrame columns.")
+
+        self.data[date_column] = pd.to_datetime(self.data[date_column])
+        self.data.set_index(date_column, inplace=True)
+
+        # Prepare for plotting
+        for aggregation in aggregations:
+            aggregated_data = self.data.resample(aggregation).mean()
+
+            # Check if data is empty after aggregation
+            if aggregated_data.empty:
+                print(f"No data available for {aggregation} aggregation.")
+                continue
+
+            # Customize background
+            plt.figure(figsize=(14, 6))
+            plt.gca().set_facecolor("lightgrey")  # Set background color
+            sns.set_style("whitegrid")  # Set seaborn style
+
+            for column in columns:
+                if column not in aggregated_data.columns:
+                    print(
+                        f"Warning: {column} not found in aggregated data for {aggregation}."
+                    )
+                    continue
+
+                sns.lineplot(
+                    data=aggregated_data,
+                    x=aggregated_data.index,
+                    y=column,
+                    label=column,
+                )
+
+            plt.title(f"Time Series Analysis ({aggregation})")
+            plt.xlabel("Time")
+            plt.ylabel("Values")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
 
     def histogram(self, column, bins=30, title="Histogram"):
         """
@@ -93,7 +126,7 @@ class Charts:
         title (str): The title of the boxplot.
         """
         plt.figure(figsize=(10, 6))
-        sns.boxplot(y=self.data[column])
+        sns.boxplot(data=self.data[column], palette="pastel")
         plt.title(title)
         plt.grid(True)
         plt.show()
