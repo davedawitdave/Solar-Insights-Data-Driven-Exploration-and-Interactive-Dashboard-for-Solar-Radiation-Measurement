@@ -77,30 +77,47 @@ class Charts:
             plt.grid(True)
             plt.show()
 
-    def histogram(self, column, bins=30, title="Histogram", xlabel="Values"):
+    def histogram(
+        self,
+        column,
+        bins=8,
+        title="Histogram",
+        xlabel="Values",
+        figsize=(10, 6),
+        num_cols=1,
+    ):
         """
-        Creates a histogram for the specified column.
+        Creates a histogram or a grid of histograms for the specified column(s).
 
         Parameters:
-        column (str): The column name to plot the histogram for.
-        bins (int): Number of bins for the histogram.
-        title (str): The title of the histogram.
+        column (str or list): A single column name or a list of column names to create histograms for.
+        bins (int): The number of bins for the histogram(s).
+        title (str or list): The title of the histogram(s). Can be a single string or a list of titles.
+        xlabel (str or list): The label for the x-axis. Can be a single string or a list of labels.
+        figsize (tuple): The size of the figure (width, height).
+        num_cols (int): The number of columns in the grid layout (only used when multiple columns are provided).
         """
-        # Ensure the column exists
-        if column not in self.data.columns:
-            raise KeyError(f"{column} not found in DataFrame.")
+        # Ensure the column(s) exist in the DataFrame
+        if isinstance(column, str):
+            column = [column]
+        for col in column:
+            if col not in self.data.columns:
+                raise KeyError(f"{col} not found in DataFrame.")
 
-        plt.figure(figsize=(10, 6))
-        sns.histplot(
-            self.data[column], bins=bins, kde=True, color="skyblue", edgecolor="black"
-        )
+        num_rows = (len(column) + num_cols - 1) // num_cols
 
-        # Set titles and labels
-        plt.title(title, fontsize=16)
-        plt.xlabel(xlabel, fontsize=14)
-        plt.ylabel("Frequency", fontsize=14)
+        plt.figure(figsize=figsize)
+        for i, col in enumerate(column):
+            plt.subplot(num_rows, num_cols, i + 1)
+            sns.histplot(
+                self.data[col], bins=bins, kde=True, color="skyblue", edgecolor="black"
+            )
+            plt.title(title[i] if isinstance(title, list) else title, fontsize=14)
+            plt.xlabel(xlabel[i] if isinstance(xlabel, list) else xlabel, fontsize=12)
+            plt.ylabel("Frequency", fontsize=12)
+            plt.grid(True)
 
-        plt.grid(True)
+        plt.tight_layout()
         plt.show()
 
     def scatter_plot(self, x_col, y_col, title="Scatter Plot"):
