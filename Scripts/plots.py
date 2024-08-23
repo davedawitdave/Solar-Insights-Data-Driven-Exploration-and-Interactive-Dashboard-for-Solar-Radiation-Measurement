@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
@@ -176,7 +177,13 @@ class Charts:
         plt.show()
 
     def bubble_chart(
-        self, x_col, y_col, size_col, color_col=None, title="Bubble Chart"
+        self,
+        x_col,
+        y_col,
+        size_col,
+        color_col=None,
+        tooltip_cols=None,
+        title="Bubble Chart",
     ):
         """
         Generates a bubble chart, where the size of bubbles represents another variable.
@@ -188,14 +195,53 @@ class Charts:
         color_col (str, optional): The column name for coloring the bubbles.
         title (str): The title of the bubble chart.
         """
-        fig = px.scatter(
-            self.data,
-            x=x_col,
-            y=y_col,
-            size=size_col,
-            color=color_col,
+        missing_cols = [
+            col
+            for col in [x_col, y_col, size_col]
+            + ([] if color_col is None else [color_col])
+            + ([] if tooltip_cols is None else tooltip_cols)
+            if col not in self.data.columns
+        ]
+        if missing_cols:
+            raise KeyError(
+                f"The following columns were not found in the DataFrame: {', '.join(missing_cols)}"
+            )
+
+        trace = go.Scatter(
+            x=self.data[x_col],
+            y=self.data[y_col],
+            mode="markers",
+            marker=dict(
+                size=self.data[size_col],
+                color=self.data[color_col] if color_col else "blue",
+                opacity=0.7,
+            ),
+            text=(
+                self.data[tooltip_cols].to_string(index=False) if tooltip_cols else None
+            ),
+            hovertemplate=(
+                "<br>".join(
+                    [
+                        f"{x_col}: %{{x:.2f}}",
+                        f"{y_col}: %{{y:.2f}}",
+                        f"{size_col}: %{{marker.size:.2f}}",
+                        "%{text}",
+                    ]
+                )
+                if tooltip_cols
+                else None
+            ),
+        )
+
+        fig = go.Figure(data=[trace])
+        fig.update_layout(
             title=title,
-            size_max=60,
+            xaxis_title=x_col,
+            yaxis_title=y_col,
+            xaxis_range=[self.data[x_col].min(), self.data[x_col].max()],
+            yaxis_range=[self.data[y_col].min(), self.data[y_col].max()],
+            width=800,
+            height=600,
         )
         fig.show()
 
