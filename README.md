@@ -30,9 +30,14 @@ The data includes solar radiation measurements and related environmental metrics
 - **'WS'**: Wind Speed
 - **'BP'**: Barometric Pressure
 
-## Installation
+- ## Navigate to the Project Directory
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/yourusername/solar-insights.git
+```bash
+cd solar-insights
+
+- ## Install the Required Packages
+     pip install -r requirements.txt
+- ## Running the Application
+Start the Streamlit App:
+
 
